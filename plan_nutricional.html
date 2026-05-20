@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Nutricional — Andrés Díaz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh;}
+
+header{background:linear-gradient(135deg,#1a1f2e,#16213e);border-bottom:2px solid #2d6a4f;padding:22px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+header h1{font-size:1.65rem;font-weight:700;}
+header h1 span{color:#52b788;}
+.meta{text-align:right;font-size:0.78rem;color:#94a3b8;line-height:1.75;}
+
+.stats{background:#1a1f2e;padding:14px 32px;display:flex;gap:12px;border-bottom:1px solid #2a2f3e;flex-wrap:wrap;}
+.stat{background:#0f1117;border:1px solid #2a2f3e;border-radius:10px;padding:10px 18px;flex:1;min-width:100px;text-align:center;}
+.stat .val{font-size:1.35rem;font-weight:700;color:#52b788;}
+.stat.p .val{color:#60a5fa;} .stat.g .val{color:#f59e0b;} .stat.c .val{color:#a78bfa;}
+.stat .lbl{font-size:0.67rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+
+/* ── SECTION NAV ── */
+.section-nav{display:flex;background:#111827;border-bottom:2px solid #1e293b;}
+.snav{padding:13px 28px;cursor:pointer;font-size:0.88rem;font-weight:600;color:#475569;border-bottom:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.snav:hover{color:#94a3b8;}
+.snav.active{color:#52b788;border-bottom-color:#52b788;background:#0d1f14;}
+.snav.inbody-tab.active{color:#60a5fa;border-bottom-color:#60a5fa;background:#0d1525;}
+
+/* ── WEEK NAV ── */
+.week-nav{background:#1a1f2e;border-bottom:1px solid #2a2f3e;padding:16px 32px;}
+.wnav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;}
+.wnav-btn{background:#0f1117;border:1px solid #2a2f3e;border-radius:8px;color:#94a3b8;padding:8px 18px;cursor:pointer;font-size:0.85rem;font-family:inherit;transition:all .2s;}
+.wnav-btn:hover{background:#1e293b;color:#e2e8f0;border-color:#374151;}
+.wnav-btn.disabled{opacity:.3;cursor:default;pointer-events:none;}
+.wnav-center{text-align:center;}
+.wnav-title{font-size:1.25rem;font-weight:700;color:#fff;}
+.wnav-title span{color:#52b788;}
+.wnav-range{font-size:0.73rem;color:#64748b;margin-top:3px;}
+.wnav-overall{font-size:0.75rem;color:#52b788;margin-top:5px;font-weight:600;}
+.week-strip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.week-strip::-webkit-scrollbar{display:none;}
+.wpill{display:flex;flex-direction:column;align-items:center;gap:3px;background:#0f1117;border:1.5px solid #1e293b;border-radius:9px;padding:7px 12px;cursor:pointer;min-width:58px;transition:all .2s;}
+.wpill:hover{border-color:#374151;}
+.wpill.active{border-color:#2d6a4f;background:#0d1f14;}
+.wpill .wn{font-size:0.72rem;font-weight:700;color:#64748b;}
+.wpill.active .wn{color:#52b788;}
+.wpill .wp{font-size:0.62rem;color:#475569;}
+.wpill .wb{width:36px;height:4px;border-radius:2px;background:#1e293b;overflow:hidden;margin-top:1px;}
+.wpill .wbf{height:100%;border-radius:2px;transition:width .4s;}
+
+/* ── DAY TABS ── */
+.tabs{display:flex;background:#1a1f2e;border-bottom:1px solid #2a2f3e;overflow-x:auto;padding:0 24px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:13px 16px;cursor:pointer;font-size:0.87rem;color:#64748b;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab:hover{color:#cbd5e1;}
+.tab.active{color:#52b788;border-bottom-color:#52b788;font-weight:600;}
+.tab .tdate{font-size:0.62rem;color:#475569;}
+.tab.active .tdate{color:#2d6a4f;}
+.tab .tdot{width:7px;height:7px;border-radius:50%;background:#1e293b;transition:background .35s;}
+
+/* ── DAY CONTENT ── */
+.day-wrap{padding:26px 32px;max-width:1300px;margin:0 auto;display:none;}
+.day-wrap.active{display:block;}
+.day-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.day-title{font-size:1.3rem;font-weight:700;}
+.day-title .sub{font-size:0.88rem;font-weight:400;color:#475569;}
+.day-macros{display:flex;gap:14px;font-size:0.77rem;color:#94a3b8;flex-wrap:wrap;}
+.day-macros span{display:flex;align-items:center;gap:4px;}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.dot.k{background:#52b788;} .dot.p{background:#60a5fa;} .dot.g{background:#f59e0b;} .dot.c{background:#a78bfa;}
+.prog-wrap{margin-bottom:22px;}
+.prog-labels{display:flex;justify-content:space-between;font-size:0.77rem;color:#64748b;margin-bottom:7px;}
+.prog-pct{color:#52b788;font-weight:600;}
+.prog-track{background:#1a1f2e;border-radius:99px;height:13px;overflow:hidden;border:1px solid #2a2f3e;}
+.prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#1b4332,#2d6a4f,#52b788);transition:width .4s ease;}
+
+/* ── MEAL CARD ── */
+.meals-grid{display:grid;gap:16px;}
+.meal-card{background:#1a1f2e;border:1px solid #2a2f3e;border-radius:14px;overflow:hidden;display:grid;grid-template-columns:140px 1fr;transition:border-color .2s;}
+.meal-card:hover{border-color:#374151;}
+.meal-img{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 10px;gap:9px;background:linear-gradient(160deg,var(--ca),var(--cb));transition:background .3s;}
+.meal-emoji{font-size:3rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));transition:all .25s;}
+.method-badge{background:rgba(0,0,0,.35);color:#fff;border-radius:20px;padding:3px 9px;font-size:0.6rem;text-align:center;text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(4px);}
+.meal-body{padding:16px 18px;}
+.meal-cat{font-size:0.67rem;color:#52b788;text-transform:uppercase;letter-spacing:.1em;font-weight:700;}
+.meal-time{font-size:0.7rem;color:#475569;margin-top:2px;margin-bottom:10px;}
+.variant-toggle{display:flex;gap:6px;margin-bottom:12px;}
+.vpill{padding:5px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1.5px solid #2a2f3e;color:#64748b;background:#0f1117;transition:all .2s;user-select:none;}
+.vpill.active.especial{background:#1e3a2f;border-color:#2d6a4f;color:#52b788;}
+.vpill.active.comun{background:#1e2a3f;border-color:#2d4a6f;color:#60a5fa;}
+.vpill:hover:not(.active){border-color:#374151;color:#94a3b8;}
+.cook-box{background:#0a0d14;border-left:3px solid #2d6a4f;border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:13px;}
+.cook-label{font-size:0.63rem;color:#52b788;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:4px;}
+.cook-text{font-size:0.79rem;color:#94a3b8;line-height:1.55;}
+.items-list{display:flex;flex-direction:column;gap:6px;}
+.item-row{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;background:#0f1117;cursor:pointer;transition:background .15s;user-select:none;}
+.item-row:hover{background:#141b27;}
+.item-row.checked .item-food{text-decoration:line-through;color:#334155;}
+.item-row.checked .item-qty,.item-row.checked .kcal-tag{opacity:.35;}
+.item-row.prot-row{border-left:2px solid #2d6a4f;}
+.chk{width:19px;height:19px;border-radius:5px;border:2px solid #2d6a4f;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.item-row.checked .chk{background:#2d6a4f;border-color:#52b788;}
+.chk-icon{display:none;color:#fff;font-size:12px;font-weight:700;}
+.item-row.checked .chk-icon{display:block;}
+.item-food{flex:1;font-size:0.83rem;color:#cbd5e1;}
+.item-qty{font-size:0.72rem;color:#475569;white-space:nowrap;}
+.kcal-tag{background:#1e3a2f;color:#52b788;padding:2px 7px;border-radius:4px;font-size:0.69rem;white-space:nowrap;}
+.ts-badge{display:none;align-items:center;background:#0d2119;border:1px solid #1b4332;color:#4ade80;border-radius:5px;padding:2px 7px;font-size:0.67rem;white-space:nowrap;flex-shrink:0;}
+.ts-badge.show{display:inline-flex;}
+
+/* ── REGISTRAR DÍA ── */
+.day-reg{margin-top:28px;border-top:1px solid #1e293b;padding-top:24px;}
+.reg-open-btn{width:100%;padding:14px;background:#0a0d14;border:1.5px dashed #2d6a4f;border-radius:12px;color:#52b788;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.03em;}
+.reg-open-btn:hover{background:#0d1f14;border-color:#52b788;border-style:solid;}
+.reg-form-wrap{background:#1a1f2e;border:1px solid #2a2f3e;border-radius:14px;padding:22px;display:none;}
+.reg-form-title{font-size:0.95rem;font-weight:700;color:#52b788;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.reg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:13px;margin-bottom:14px;}
+.reg-field{display:flex;flex-direction:column;gap:5px;}
+.reg-field.full{grid-column:1/-1;}
+.reg-field label{font-size:0.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;}
+.reg-field input,.reg-field select,.reg-field textarea{background:#0f1117;border:1px solid #2a2f3e;border-radius:8px;color:#e2e8f0;padding:9px 12px;font-size:0.84rem;font-family:inherit;outline:none;transition:border-color .15s;width:100%;}
+.reg-field input:focus,.reg-field select:focus,.reg-field textarea:focus{border-color:#2d6a4f;}
+.reg-field select option{background:#1a1f2e;}
+.reg-field textarea{resize:vertical;min-height:72px;}
+.reg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.reg-cancel-btn{background:transparent;border:1px solid #374151;border-radius:8px;color:#64748b;padding:9px 20px;cursor:pointer;font-family:inherit;font-size:0.84rem;transition:all .2s;}
+.reg-cancel-btn:hover{border-color:#52b788;color:#94a3b8;}
+.reg-save-btn{background:#2d6a4f;border:none;border-radius:8px;color:#fff;padding:9px 24px;cursor:pointer;font-family:inherit;font-size:0.84rem;font-weight:600;transition:all .2s;}
+.reg-save-btn:hover{background:#22543d;}
+.reg-sum-wrap{background:#1a1f2e;border:1px solid #2d6a4f;border-radius:14px;padding:20px 22px;display:none;}
+.reg-sum-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.reg-sum-title{font-size:0.9rem;font-weight:700;color:#52b788;}
+.reg-sum-time{font-size:0.68rem;color:#475569;margin-top:3px;}
+.reg-edit-btn{background:#0f1117;border:1px solid #2a2f3e;border-radius:6px;color:#94a3b8;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.73rem;transition:all .2s;}
+.reg-edit-btn:hover{border-color:#52b788;color:#52b788;}
+.macro-cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:14px;}
+.mc-card{background:#0f1117;border-radius:10px;padding:11px 13px;border:1px solid #1e293b;}
+.mc-lbl{font-size:0.63rem;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.mc-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;}
+.mc-val{font-size:1.05rem;font-weight:700;color:#e2e8f0;}
+.mc-plan{font-size:0.68rem;color:#475569;margin-top:2px;}
+.mc-delta{font-size:0.73rem;font-weight:600;}
+.ok{color:#52b788;} .over{color:#f59e0b;} .under{color:#60a5fa;}
+.reg-mood{font-size:0.9rem;margin-bottom:10px;}
+.reg-notes{background:#0f1117;border-radius:8px;padding:10px 14px;font-size:0.81rem;color:#94a3b8;line-height:1.5;border-left:3px solid #1e293b;font-style:italic;}
+
+/* ── INBODY SECTION ── */
+#section-inbody{padding:28px 32px;max-width:1100px;margin:0 auto;display:none;}
+.ib-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.ib-title{font-size:1.3rem;font-weight:700;}
+.ib-title span{color:#60a5fa;}
+.ib-add-btn{background:#1e2a3f;border:1.5px solid #2d4a6f;border-radius:10px;color:#60a5fa;padding:10px 20px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:600;transition:all .2s;}
+.ib-add-btn:hover{background:#162035;border-color:#60a5fa;}
+
+.ib-goal{background:#1a1f2e;border:1px solid #2a2f3e;border-left:4px solid #52b788;border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.ib-goal-item{text-align:center;}
+.ib-goal-val{font-size:1.2rem;font-weight:700;}
+.ib-goal-lbl{font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.ib-goal-sep{color:#2a2f3e;font-size:1.5rem;}
+.goal-bar-wrap{flex:1;min-width:200px;}
+.goal-bar-label{display:flex;justify-content:space-between;font-size:0.73rem;color:#64748b;margin-bottom:6px;}
+.goal-bar-track{background:#0f1117;border-radius:99px;height:10px;overflow:hidden;border:1px solid #2a2f3e;}
+.goal-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#2d6a4f,#52b788);transition:width .5s;}
+
+.ib-entries{display:flex;flex-direction:column;gap:16px;margin-bottom:28px;}
+.ib-entry{background:#1a1f2e;border:1px solid #2a2f3e;border-radius:14px;overflow:hidden;}
+.ib-entry.first-entry{border-color:#2d4a6f;}
+.ib-entry-hdr{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;background:#0f1117;flex-wrap:wrap;gap:8px;}
+.ib-entry-date{font-size:0.95rem;font-weight:700;color:#e2e8f0;}
+.ib-entry-tag{font-size:0.68rem;padding:3px 10px;border-radius:20px;font-weight:600;}
+.tag-inicial{background:#1e2a3f;color:#60a5fa;}
+.tag-seguimiento{background:#1e3a2f;color:#52b788;}
+.ib-entry-del{background:transparent;border:1px solid #374151;border-radius:6px;color:#64748b;padding:4px 10px;cursor:pointer;font-family:inherit;font-size:0.72rem;transition:all .2s;}
+.ib-entry-del:hover{border-color:#dc2626;color:#dc2626;}
+.ib-metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:16px 18px;}
+.ib-metric{background:#0f1117;border-radius:9px;padding:10px 13px;border:1px solid #1e293b;}
+.ib-metric .ml{font-size:0.62rem;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.ib-metric .mv{font-size:1.1rem;font-weight:700;color:#e2e8f0;}
+.ib-metric .mu{font-size:0.7rem;color:#475569;}
+.ib-metric.highlight .mv{color:#60a5fa;}
+.ib-metric .mdelta{font-size:0.7rem;font-weight:600;margin-top:2px;}
+.ib-metric .mdelta.pos{color:#52b788;} .ib-metric .mdelta.neg{color:#f87171;} .ib-metric .mdelta.neu{color:#64748b;}
+.ib-entry-nota{padding:0 18px 14px;font-size:0.8rem;color:#64748b;font-style:italic;}
+
+.ib-evo{background:#1a1f2e;border:1px solid #2a2f3e;border-radius:14px;padding:20px 22px;margin-bottom:24px;}
+.ib-evo-title{font-size:0.95rem;font-weight:700;color:#60a5fa;margin-bottom:16px;}
+.ib-evo-table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+.ib-evo-table th{color:#64748b;font-size:0.68rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left;background:#0f1117;}
+.ib-evo-table td{padding:10px 12px;border-top:1px solid #1e293b;color:#cbd5e1;}
+.ib-evo-table tr:hover td{background:#0d1525;}
+
+.ib-form-wrap{background:#1a1f2e;border:1px solid #2d4a6f;border-radius:14px;padding:22px;display:none;margin-bottom:24px;}
+.ib-form-title{font-size:0.95rem;font-weight:700;color:#60a5fa;margin-bottom:18px;}
+.ib-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:13px;margin-bottom:16px;}
+.ib-field{display:flex;flex-direction:column;gap:5px;}
+.ib-field label{font-size:0.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;}
+.ib-field input,.ib-field textarea{background:#0f1117;border:1px solid #2a2f3e;border-radius:8px;color:#e2e8f0;padding:9px 12px;font-size:0.84rem;font-family:inherit;outline:none;transition:border-color .15s;width:100%;}
+.ib-field input:focus,.ib-field textarea:focus{border-color:#3b82f6;}
+.ib-field.full{grid-column:1/-1;}
+.ib-form-actions{display:flex;gap:10px;justify-content:flex-end;}
+.ib-cancel{background:transparent;border:1px solid #374151;border-radius:8px;color:#64748b;padding:9px 20px;cursor:pointer;font-family:inherit;font-size:0.84rem;transition:all .2s;}
+.ib-cancel:hover{border-color:#60a5fa;color:#94a3b8;}
+.ib-save{background:#1d4ed8;border:none;border-radius:8px;color:#fff;padding:9px 24px;cursor:pointer;font-family:inherit;font-size:0.84rem;font-weight:600;transition:all .2s;}
+.ib-save:hover{background:#1e40af;}
+.ib-empty{text-align:center;padding:32px;color:#475569;font-size:0.85rem;border:1.5px dashed #1e293b;border-radius:12px;}
+
+@keyframes nd-spin{to{transform:rotate(360deg)}}
+@media(max-width:680px){
+  .meal-card{grid-template-columns:1fr;}
+  .meal-img{flex-direction:row;height:76px;justify-content:flex-start;padding:14px 18px;gap:14px;}
+  .meal-emoji{font-size:2.3rem;}
+  header{flex-direction:column;text-align:center;} .meta{text-align:center;}
+  .day-wrap,#section-inbody{padding:18px 14px;}
+  .week-nav,.stats{padding-left:16px;padding-right:16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="nd-loading" style="position:fixed;inset:0;background:#0f1117;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:18px;">
+  <div style="width:44px;height:44px;border:3px solid #2d6a4f;border-top-color:#52b788;border-radius:50%;animation:nd-spin .8s linear infinite;"></div>
+  <div style="color:#52b788;font-size:0.9rem;font-family:'Segoe UI',sans-serif;letter-spacing:.03em;">Sincronizando datos...</div>
+</div>
+
+<header>
+  <div>
+    <h1>Plan <span>Nutricional</span></h1>
+    <p style="color:#475569;font-size:0.78rem;margin-top:3px;">Andrés Díaz · 1 junio 2026 en adelante</p>
+  </div>
+  <div class="meta">
+    <div>InBody base: 24 marzo 2026 · 100.3 kg · 30.4% grasa</div>
+    <div>Masa muscular: 40.4 kg (Alto) · Meta: −18.1 kg grasa</div>
+    <div>Déficit: ~500 kcal/día · Próximo InBody: agosto 2026</div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="val">~1.900</div><div class="lbl">kcal / día</div></div>
+  <div class="stat p"><div class="val">190g</div><div class="lbl">Proteína</div></div>
+  <div class="stat g"><div class="val">51g</div><div class="lbl">Grasas</div></div>
+  <div class="stat c"><div class="val">162g</div><div class="lbl">Carbohidratos</div></div>
+  <div class="stat"><div class="val">−500</div><div class="lbl">Déficit kcal</div></div>
+  <div class="stat"><div class="val">3 L</div><div class="lbl">Agua mínima</div></div>
+</div>
+
+<div class="section-nav">
+  <div class="snav active" id="snav-plan" onclick="showSection('plan')">📅 Plan Semanal</div>
+  <div class="snav inbody-tab" id="snav-inbody" onclick="showSection('inbody')">📊 InBody</div>
+</div>
+
+<!-- PLAN SECTION -->
+<div id="section-plan">
+  <div class="week-nav" id="week-nav"></div>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+</div>
+
+<!-- INBODY SECTION -->
+<div id="section-inbody"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const START = new Date(2026,5,1);
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+const FB_CFG={apiKey:"AIzaSyCMyCDN8_a59blO_jHg04-3QI2-4TnkT-E",authDomain:"personal-f6e54.firebaseapp.com",databaseURL:"https://personal-f6e54-default-rtdb.firebaseio.com",projectId:"personal-f6e54",storageBucket:"personal-f6e54.firebasestorage.app",messagingSenderId:"490522379116",appId:"1:490522379116:web:da7377a7f6f336bb4fa949"};
+firebase.initializeApp(FB_CFG);
+const DB=firebase.database();
+let STORE={cw:1,weeks:{},inbody:{}};
+let CW=1;
+
+function weekStart(wk){ const d=new Date(START); d.setDate(d.getDate()+(wk-1)*7); return d; }
+function dayDate(wk,di){ const d=weekStart(wk); d.setDate(d.getDate()+di); return `${d.getDate()} ${MESES[d.getMonth()]}`; }
+function weekRange(wk){ const s=weekStart(wk); const e=new Date(s); e.setDate(e.getDate()+6); return `${s.getDate()} ${MESES[s.getMonth()]} – ${e.getDate()} ${MESES[e.getMonth()]} ${e.getFullYear()}`; }
+
+function _wk(){ if(!STORE.weeks[`w${CW}`]) STORE.weeks[`w${CW}`]={}; return STORE.weeks[`w${CW}`]; }
+function getChecks(){ return _wk().chk||{}; }
+function saveChecks(o){ _wk().chk=o; DB.ref(`nd/weeks/w${CW}/chk`).set(o); }
+function getVarSels(){ return _wk().var||{}; }
+function saveVarSels(o){ _wk().var=o; DB.ref(`nd/weeks/w${CW}/var`).set(o); }
+function getVariant(di,mi){ return getVarSels()[`${di}-${mi}`]||0; }
+function fmtTime(ts){ const d=new Date(ts); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+function fmtDateTime(ts){ const d=new Date(ts); return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
+
+// ── PLAN DATA ─────────────────────────────────────────────────────────────
+const PLAN = [
+  { day:"Lunes", kcal:2128, prot:203, fat:64, carb:181, meals:[
+    { name:"Desayuno", time:"07:00–08:00", emoji:"🍳", ca:"#b45309", cb:"#78350f", method:"Plancha · Hervido",
+      tip:"Bate 3 huevos con sal y cocínalos revolviendo en sartén antiadherente con spray vegetal a fuego bajo-medio. Aparte, calienta la leche Colun, agrega la avena Quaker y revuelve 5 min hasta que esté cremosa.",
+      items:[{f:"Huevos Agrosuper",q:"3 unidades",k:215},{f:"Avena Quaker",q:"80g en seco",k:305},{f:"Leche Colun descremada",q:"200ml",k:68}]},
+    { name:"Colación AM", time:"10:00–10:30", emoji:"🥛", ca:"#1d4ed8", cb:"#1e3a8a", method:"Sin cocción",
+      tip:"Sirve el yogur griego Colun en un bowl y agrega las nueces partidas encima.",
+      items:[{f:"Yogur Griego Colun natural",q:"200g",k:112},{f:"Nueces Watts o a granel",q:"20g",k:148}]},
+    { name:"Almuerzo", time:"13:00–14:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐠",ca:"#0f766e",cb:"#134e4a",method:"Plancha",tip:"Sazona el salmón con limón, sal de mar y eneldo seco. Sartén antiadherente caliente, 4-5 min por lado sin mover. Dorado afuera, jugoso adentro.",pf:"Salmón del Pacífico fresco",pq:"180g",pk:306},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo en polvo, orégano, paprika y limón. Plancha caliente sin aceite, 6-7 min por lado. No presiones la carne.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Arroz integral Tucapel",q:"150g cocido",k:165},{f:"Ensalada lechuga, tomate, pepino",q:"libre",k:20},{f:"Aceite de oliva extra virgen",q:"1 cucharadita",k:45}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🐟", ca:"#0369a1", cb:"#0c4a6e", method:"Sin cocción",
+      tip:"Escurre el atún Aldaya y mézclalo con limón y cebollín picado. Sirve sobre las galletas de arroz integral.",
+      items:[{f:"Atún Aldaya al agua (lata)",q:"1 lata 160g",k:130},{f:"Galletas de arroz integrales",q:"3 unidades",k:120}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐟",ca:"#0f766e",cb:"#134e4a",method:"Horno",tip:"Envuelve la reineta en papel aluminio con rodajas de limón, ajo en láminas y sal. Sella y hornea a 190°C por 20-22 min.",pf:"Reineta al horno",pq:"200g",pk:204},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo, orégano y paprika. Plancha caliente sin aceite, 6-7 min por lado hasta dorar completamente.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Camote / batata pelado",q:"150g cocido",k:148},{f:"Brócoli fresco al vapor",q:"150g",k:51}]}
+  ]},
+  { day:"Martes", kcal:1886, prot:200, fat:53, carb:152, meals:[
+    { name:"Desayuno", time:"07:00–08:00", emoji:"🥚", ca:"#7c3aed", cb:"#4c1d95", method:"Plancha",
+      tip:"Separa 4 claras + 1 huevo, bate con sal. Omelette en sartén antiadherente doblado. Sirve sobre el pan Bimbo tostado con palta Hass aplastada con sal y limón.",
+      items:[{f:"Pan de molde integral Bimbo",q:"2 rebanadas",k:154},{f:"Huevos Agrosuper (4 claras+1 entero)",q:"5 und",k:142},{f:"Palta Hass",q:"½ unidad",k:112}]},
+    { name:"Colación AM", time:"10:00–10:30", emoji:"🧀", ca:"#d97706", cb:"#92400e", method:"Sin cocción",
+      tip:"El quesillo fresco lo encuentras laminado en la sección de lácteos. Sírvelo con la manzana en gajos.",
+      items:[{f:"Quesillo fresco",q:"200g",k:164},{f:"Manzana",q:"1 unidad mediana",k:95}]},
+    { name:"Almuerzo", time:"13:00–14:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐟",ca:"#0369a1",cb:"#0c4a6e",method:"Horno",tip:"Coloca la merluza austral en papel aluminio con rodajas de limón, sal y perejil picado. Sella y hornea a 190°C por 18-20 min.",pf:"Merluza austral al horno",pq:"200g",pk:200},
+        {tag:"Común",emoji:"🥩",ca:"#dc2626",cb:"#7f1d1d",method:"Sartén",tip:"Saltea la carne molida especial con ajo picado y cebolla en sartén caliente sin aceite hasta dorar. Sazona con comino, orégano y sal.",pf:"Carne molida especial 90% magra",pq:"200g",pk:350}],
+      sides:[{f:"Lentejas Carozzi cocidas",q:"150g",k:175},{f:"Ensalada mixta aliñada con limón",q:"libre",k:24}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🍌", ca:"#ca8a04", cb:"#713f12", method:"Sin cocción",
+      tip:"El requesón está en lácteos frescos. Mézclalo con el plátano en rodajas. Alto en caseína, ideal para la tarde.",
+      items:[{f:"Requesón",q:"150g",k:107},{f:"Plátano / banana",q:"1 unidad pequeña",k:89}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🦃",ca:"#064e3b",cb:"#022c22",method:"Plancha",tip:"Sazona el filete de pavo San Jorge con ajo, orégano y limón. Plancha a fuego medio, 5-6 min por lado. Comprueba que no esté rosado.",pf:"Filete de pavo San Jorge",pq:"200g",pk:278},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo en polvo, comino y limón. Plancha caliente 6-7 min por lado.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Quinoa orgánica (Jumbo / Lider)",q:"120g cocida",k:146},{f:"Espinaca fresca salteada con ajo",q:"100g",k:50}]}
+  ]},
+  { day:"Miércoles", kcal:1925, prot:192, fat:50, carb:175, meals:[
+    { name:"Desayuno", time:"07:00–08:00", emoji:"💪", ca:"#b45309", cb:"#451a03", method:"Hervido",
+      tip:"Calienta 200ml de leche Colun en olla. Agrega avena Quaker y cocina 5 min revolviendo. Fuera del fuego, mezcla el scoop de proteína whey.",
+      items:[{f:"Avena Quaker",q:"80g en seco",k:298},{f:"Proteína Whey (vainilla o chocolate)",q:"1 scoop 30g",k:132},{f:"Leche Colun descremada",q:"200ml",k:68}]},
+    { name:"Colación AM", time:"10:00–10:30", emoji:"🥛", ca:"#1d4ed8", cb:"#1e3a8a", method:"Sin cocción",
+      tip:"Sirve el yogur griego Colun con las almendras naturales Watts encima.",
+      items:[{f:"Yogur Griego Colun natural",q:"200g",k:112},{f:"Almendras naturales Watts",q:"20g",k:140}]},
+    { name:"Almuerzo", time:"13:00–14:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐟",ca:"#0369a1",cb:"#0c4a6e",method:"Horno",tip:"Coloca la merluza austral en papel aluminio con limón, sal y perejil. Sella y hornea a 190°C por 20 min.",pf:"Merluza austral (fresca o congelada)",pq:"250g",pk:255},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo, paprika, orégano y limón. Plancha caliente 6-7 min por lado.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Papa entera con cáscara cocida",q:"200g",k:160},{f:"Ensalada repollo y zanahoria rallada",q:"libre",k:40},{f:"Aceite de oliva extra virgen",q:"1 cucharadita",k:45}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🥚", ca:"#374151", cb:"#111827", method:"Hervido",
+      tip:"Hierve los huevos Agrosuper exactamente 10 min. Enfría con agua fría de inmediato para pelarlos fácil.",
+      items:[{f:"Huevos duros Agrosuper",q:"2 unidades",k:143},{f:"Galletas de arroz integrales",q:"3 unidades",k:100}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐠",ca:"#0f766e",cb:"#134e4a",method:"Plancha · Horno",tip:"Sella el salmón en sartén caliente 3 min por lado. Pasa al horno a 180°C por 8 min. Aliña con limón y eneldo.",pf:"Salmón del Pacífico fresco",pq:"180g",pk:306},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Horno",tip:"Precalienta horno a 200°C. Sazona el muslo sin piel con ajo, paprika y orégano. Hornea 30-35 min.",pf:"Muslo de pollo Agrosuper sin piel",pq:"200g",pk:274}],
+      sides:[{f:"Arroz integral Tucapel",q:"120g cocido",k:121},{f:"Zapallo italiano grillado",q:"150g",k:37}]}
+  ]},
+  { day:"Jueves", kcal:1886, prot:199, fat:52, carb:152, meals:[
+    { name:"Desayuno", time:"07:00–08:00", emoji:"🍳", ca:"#b45309", cb:"#78350f", method:"Plancha · Sin cocción",
+      tip:"Revuelve 3 huevos con sal a fuego bajo-medio en sartén antiadherente. Tuesta el pan Bimbo. Aplasta ¼ de palta Hass sobre el pan con limón y sal.",
+      items:[{f:"Huevos Agrosuper revueltos",q:"3 unidades",k:215},{f:"Pan de molde integral Bimbo",q:"2 rebanadas",k:154},{f:"Tomate + Palta Hass",q:"½ tomate + ¼ palta",k:72}]},
+    { name:"Colación AM", time:"10:00–10:30", emoji:"🐟", ca:"#0369a1", cb:"#0c4a6e", method:"Sin cocción",
+      tip:"Escurre el atún Aldaya y mézclalo con limón y perejil picado. Sirve sobre las galletas de arroz.",
+      items:[{f:"Atún Aldaya al agua (lata)",q:"1 lata 160g",k:130},{f:"Galletas de arroz integrales",q:"3 unidades",k:100}]},
+    { name:"Almuerzo", time:"13:00–14:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐠",ca:"#0f766e",cb:"#134e4a",method:"Plancha sellado",tip:"Sella los lomos de atún fresco en plancha MUY caliente, 2-3 min por lado. Debe quedar rosado por dentro. Aliña con soja light y jengibre.",pf:"Atún en lomos frescos",pq:"200g",pk:280},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo y paprika. Cocina en plancha caliente 6-7 min por lado.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Fideos integrales Carozzi",q:"150g cocidos",k:179},{f:"Salsa de tomate natural sin azúcar",q:"100g",k:36},{f:"Ensalada verde",q:"libre",k:20}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🥛", ca:"#1d4ed8", cb:"#1e3a8a", method:"Sin cocción",
+      tip:"Sirve el yogur griego Colun con las nueces partidas encima.",
+      items:[{f:"Yogur Griego Colun natural",q:"200g",k:112},{f:"Nueces Watts o a granel",q:"15g",k:111}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🥩",ca:"#991b1b",cb:"#450a0a",method:"Plancha",tip:"Aplana el filete de cerdo a ~1.5cm. Sazona con ajo, tomillo y sal. Plancha a fuego medio, 4-5 min por lado. Bien cocido, sin rosado.",pf:"Filete lomo de cerdo sin grasa",pq:"180g",pk:270},
+        {tag:"Común",emoji:"🥩",ca:"#dc2626",cb:"#7f1d1d",method:"Plancha",tip:"Atempera el lomo liso 20 min. Sal gruesa y pimienta. Plancha muy caliente, 3-4 min por lado. Reposa 5 min antes de cortar.",pf:"Lomo liso vacuno a la plancha",pq:"180g",pk:294}],
+      sides:[{f:"Camote / batata cocido",q:"150g",k:148},{f:"Ensalada pepino y apio con limón",q:"libre",k:20}]}
+  ]},
+  { day:"Viernes", kcal:1700, prot:166, fat:49, carb:148, meals:[
+    { name:"Desayuno", time:"07:00–08:00", emoji:"🥣", ca:"#b45309", cb:"#451a03", method:"Hervido · Plancha",
+      tip:"Cuece la avena Quaker con 150ml de leche Colun caliente, 5 min. Aparte, separa 4 claras y cocínalas revueltas en sartén con spray vegetal.",
+      items:[{f:"Avena Quaker",q:"80g en seco",k:305},{f:"Claras de huevo Agrosuper",q:"4 claras",k:57},{f:"Leche Colun descremada",q:"150ml",k:48}]},
+    { name:"Colación AM", time:"10:00–10:30", emoji:"🧀", ca:"#d97706", cb:"#92400e", method:"Sin cocción",
+      tip:"El requesón es alto en caseína. Combínalo con el plátano en rodajas.",
+      items:[{f:"Requesón",q:"200g",k:140},{f:"Plátano / banana",q:"1 unidad pequeña",k:89}]},
+    { name:"Almuerzo", time:"13:00–14:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐠",ca:"#0f766e",cb:"#134e4a",method:"Plancha",tip:"Sazona el salmón con limón, sal y eneldo. Sartén antiadherente caliente, 4-5 min por lado. Sirve sobre la quinoa con las verduras al vapor.",pf:"Salmón del Pacífico fresco",pq:"200g",pk:364},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Plancha",tip:"Sazona la pechuga Agrosuper con ajo, limón y orégano. Plancha caliente 6-7 min por lado. Sirve sobre la quinoa con las verduras.",pf:"Pechuga de pollo Agrosuper",pq:"200g",pk:295}],
+      sides:[{f:"Quinoa orgánica (Jumbo / Lider)",q:"120g cocida",k:146},{f:"Brócoli y coliflor al vapor",q:"150g",k:51}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🦃", ca:"#064e3b", cb:"#022c22", method:"Sin cocción",
+      tip:"El jamón pavo San Jorge está laminado. Tuesta el pan Bimbo y arma un mini sándwich abierto.",
+      items:[{f:"Jamón de pavo San Jorge laminado",q:"100g",k:138},{f:"Pan de molde integral Bimbo",q:"1 rebanada",k:77}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🍳",ca:"#0369a1",cb:"#0c4a6e",method:"Plancha",tip:"Bate 3 claras + 1 huevo con sal. Mezcla el atún Aldaya escurrido con limón directamente en la mezcla. Omelette en sartén antiadherente.",pf:"Omelette de claras con atún Aldaya",pq:"3 claras+1 huevo+80g atún",pk:210},
+        {tag:"Común",emoji:"🍳",ca:"#4c1d95",cb:"#2e1065",method:"Plancha",tip:"Bate 3 claras + 1 huevo con sal. Agrega el jamón pavo San Jorge picado. Omelette en sartén antiadherente, dobla cuando los bordes estén firmes.",pf:"Omelette con jamón pavo San Jorge",pq:"3 claras+1 huevo+50g jamón",pk:200}],
+      sides:[{f:"Ensalada grande mixta",q:"libre",k:40},{f:"Aceite de oliva extra virgen",q:"1 cucharadita",k:45}]}
+  ]},
+  { day:"Sábado", kcal:1976, prot:213, fat:51, carb:164, meals:[
+    { name:"Desayuno", time:"08:00–09:00", emoji:"🍳", ca:"#b45309", cb:"#78350f", method:"Plancha · Hervido",
+      tip:"Día tranquilo. Revuelve 3 huevos con hierbas. Avena Quaker con leche Colun. Fruta de temporada: naranja, kiwi, durazno o frutilla.",
+      items:[{f:"Huevos Agrosuper con hierbas",q:"3 unidades",k:215},{f:"Avena Quaker",q:"60g en seco",k:228},{f:"Fruta de temporada",q:"1 porción",k:80}]},
+    { name:"Colación AM", time:"10:30–11:00", emoji:"🥛", ca:"#1d4ed8", cb:"#1e3a8a", method:"Sin cocción",
+      tip:"Mezcla el yogur griego Colun con las nueces partidas. Agrega canela en polvo si quieres.",
+      items:[{f:"Yogur Griego Colun natural",q:"200g",k:112},{f:"Nueces Watts o a granel",q:"20g",k:148}]},
+    { name:"Almuerzo", time:"13:00–14:30", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🥩",ca:"#991b1b",cb:"#450a0a",method:"Plancha lenta",tip:"Sazona el costillar de cerdo magro con ajo, paprika, orégano y limón. Plancha a fuego medio-bajo 8-10 min por lado. Bien cocido sin rosado.",pf:"Costillar de cerdo magro",pq:"200g",pk:340},
+        {tag:"Común",emoji:"🍗",ca:"#15803d",cb:"#14532d",method:"Horno",tip:"Precalienta horno a 200°C. Sazona el pollo sin piel con ajo, paprika, orégano, comino y limón. Hornea 30-35 min hasta dorar.",pf:"Pollo entero Agrosuper sin piel",pq:"250g porción",pk:428}],
+      sides:[{f:"Ensalada chilena (tomate + cebolla)",q:"libre",k:36},{f:"Papa entera cocida",q:"150g",k:120}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🐟", ca:"#0369a1", cb:"#0c4a6e", method:"Sin cocción",
+      tip:"Escurre el atún Aldaya y mezcla con limón y ají verde picado. Sirve sobre las galletas de arroz.",
+      items:[{f:"Atún Aldaya al agua (lata)",q:"1 lata 160g",k:130},{f:"Galletas de arroz integrales",q:"3 unidades",k:112}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐟",ca:"#1e40af",cb:"#1e3a8a",method:"Horno",tip:"Envuelve el congrio colorado en papel aluminio con limón, cilantro, ajo y sal. Hornea a 180°C por 25-28 min.",pf:"Congrio colorado al horno",pq:"200g",pk:220},
+        {tag:"Común",emoji:"🐟",ca:"#0f766e",cb:"#134e4a",method:"Horno",tip:"Envuelve la reineta en papel aluminio con limón, perejil, ajo y sal. Hornea a 190°C por 20-22 min.",pf:"Reineta al horno",pq:"200g",pk:204}],
+      sides:[{f:"Arroz integral Tucapel",q:"100g cocido",k:97},{f:"Verduras grilladas (zapallo, pimientos)",q:"150g",k:66}]}
+  ]},
+  { day:"Domingo", kcal:1669, prot:170, fat:38, carb:163, meals:[
+    { name:"Desayuno", time:"08:30–09:30", emoji:"🥞", ca:"#7c3aed", cb:"#4c1d95", method:"Plancha",
+      tip:"Licúa 80g de avena Quaker seca. Mezcla con 4 claras, pizca de polvo de hornear y canela. Panqueques en sartén antiadherente con spray, 2-3 min por lado a fuego medio-bajo.",
+      items:[{f:"Panqueques de avena Quaker y claras",q:"80g avena + 4 claras",k:372},{f:"Miel de abeja natural",q:"1 cucharadita",k:35}]},
+    { name:"Colación AM", time:"11:00–11:30", emoji:"🧀", ca:"#d97706", cb:"#92400e", method:"Sin cocción",
+      tip:"El quesillo fresco tiene alta proteína y calcio. Sírvelo con sal de mar y hierbas.",
+      items:[{f:"Quesillo fresco",q:"200g",k:164}]},
+    { name:"Almuerzo", time:"13:00–14:30", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🐠",ca:"#0f766e",cb:"#134e4a",method:"Horno",tip:"Precalienta horno a 200°C. Coloca el salmón en papel aluminio con limón, eneldo y sal. Sella y hornea 18-20 min.",pf:"Salmón del Pacífico al horno",pq:"200g",pk:364},
+        {tag:"Común",emoji:"🥩",ca:"#dc2626",cb:"#7f1d1d",method:"Plancha",tip:"Sazona la posta o asiento con sal, ajo y pimienta. Plancha muy caliente, 4-5 min por lado. Reposa 5 min antes de cortar.",pf:"Posta o asiento vacuno magro",pq:"200g",pk:330}],
+      sides:[{f:"Puré de papa (leche Colun descremada)",q:"200g",k:156},{f:"Ensalada betarraga y zanahoria rallada",q:"libre",k:64}]},
+    { name:"Colación PM", time:"17:00–17:30", emoji:"🥚", ca:"#374151", cb:"#111827", method:"Hervido",
+      tip:"Hierve los huevos Agrosuper exactamente 10 min. Pásalos a agua fría con hielo para pelarlos fácil.",
+      items:[{f:"Huevos duros Agrosuper",q:"2 unidades",k:143},{f:"Fruta de temporada",q:"1 porción",k:80}]},
+    { name:"Cena", time:"20:00–21:00", type:"variant",
+      variants:[
+        {tag:"Especial",emoji:"🍲",ca:"#991b1b",cb:"#450a0a",method:"Hervido lento",tip:"Sella trozos de asado sin hueso magro con ajo. Agrega agua, zanahoria, papa, zapallo en cubos. Cocina 35-40 min a fuego medio.",pf:"Cazuela de vacuno magro",pq:"300ml caldo+150g carne",pk:295},
+        {tag:"Común",emoji:"🍲",ca:"#1e40af",cb:"#1e3a8a",method:"Hervido",tip:"Hierve agua con caldo suave. Agrega pechuga Agrosuper en trozos, zanahoria, apio, papa y zapallo. Cocina 25-30 min.",pf:"Cazuela de pollo con verduras",pq:"300ml caldo+150g pechuga",pk:248}],
+      sides:[{f:"Pan de molde integral Bimbo",q:"1 rebanada",k:77}]}
+  ]}
+];
+
+// ── PROGRESS ─────────────────────────────────────────────────────────────────
+function totalDay(di){ return PLAN[di].meals.reduce((s,m)=>m.type==='variant'?s+1+m.sides.length:s+m.items.length,0); }
+function doneDay(di){
+  const ch=getChecks();
+  return PLAN[di].meals.reduce((s,m,mi)=>{
+    if(m.type==='variant'){ const vi=getVariant(di,mi); let c=ch[`${di}-${mi}-v${vi}-p`]?1:0; m.sides.forEach((_,si)=>{if(ch[`${di}-${mi}-s${si}`])c++;}); return s+c; }
+    return s+m.items.filter((_,ii)=>ch[`${di}-${mi}-i${ii}`]).length;
+  },0);
+}
+function weekPct(wk){
+  const ch=JSON.parse(localStorage.getItem(`nd_w${wk}_chk`)||'{}');
+  const vs=JSON.parse(localStorage.getItem(`nd_w${wk}_var`)||'{}');
+  let tot=0,done=0;
+  PLAN.forEach((_,di)=>{ PLAN[di].meals.forEach((m,mi)=>{
+    if(m.type==='variant'){ tot++; const vi=vs[`${di}-${mi}`]||0; if(ch[`${di}-${mi}-v${vi}-p`])done++; m.sides.forEach((_,si)=>{tot++;if(ch[`${di}-${mi}-s${si}`])done++;}); }
+    else { m.items.forEach((_,ii)=>{tot++;if(ch[`${di}-${mi}-i${ii}`])done++;}); }
+  });});
+  return tot>0?Math.round(done/tot*100):0;
+}
+function updateDayProg(di){
+  const tot=totalDay(di),done=doneDay(di),pct=tot>0?Math.round(done/tot*100):0;
+  const bar=document.getElementById(`bar-${di}`),lbl=document.getElementById(`bar-lbl-${di}`),dot=document.getElementById(`tdot-${di}`);
+  if(bar) bar.style.width=pct+'%';
+  if(lbl) lbl.textContent=`${done} de ${tot} · ${pct}%`;
+  if(dot) dot.style.background=pct===100?'#52b788':pct>0?'#f59e0b':'#1e293b';
+}
+function updateWeekStrip(){
+  for(let w=1;w<=CW;w++){
+    const pill=document.getElementById(`wpill-${w}`); if(!pill) continue;
+    const pct=weekPct(w); const fill=pill.querySelector('.wbf'); const wp=pill.querySelector('.wp');
+    if(fill){fill.style.width=pct+'%'; fill.style.background=pct===100?'#16a34a':pct>49?'#0f766e':pct>0?'#b45309':'#2d6a4f';}
+    if(wp) wp.textContent=pct+'%';
+  }
+  const ow=document.getElementById('wnav-overall');
+  if(ow) ow.textContent=`Progreso semana ${CW}: ${weekPct(CW)}%`;
+}
+
+// ── ITEM TOGGLE ───────────────────────────────────────────────────────────────
+function toggleItem(di,rowId,key){
+  const ch=getChecks();
+  if(ch[key]) delete ch[key]; else ch[key]={ts:Date.now()};
+  saveChecks(ch);
+  const row=document.getElementById(rowId); const rec=ch[key];
+  row.classList.toggle('checked',!!rec);
+  const ts=row.querySelector('.ts-badge');
+  if(ts){if(rec){ts.textContent='⏱ '+fmtTime(rec.ts);ts.classList.add('show');}else{ts.textContent='';ts.classList.remove('show');}}
+  updateDayProg(di); updateWeekStrip();
+}
+
+// ── VARIANT SWITCH ────────────────────────────────────────────────────────────
+function switchVariant(di,mi,vi){
+  const vs=getVarSels(); vs[`${di}-${mi}`]=vi; saveVarSels(vs);
+  const m=PLAN[di].meals[mi],v=m.variants[vi];
+  const card=document.getElementById(`meal-${di}-${mi}`);
+  card.querySelector('.meal-img').style.setProperty('--ca',v.ca);
+  card.querySelector('.meal-img').style.setProperty('--cb',v.cb);
+  card.querySelector('.meal-emoji').textContent=v.emoji;
+  card.querySelector('.method-badge').textContent=v.method;
+  card.querySelector('.cook-text').textContent=v.tip;
+  card.querySelectorAll('.vpill').forEach((p,i)=>p.classList.toggle('active',i===vi));
+  const ch=getChecks(),protKey=`${di}-${mi}-v${vi}-p`,rec=ch[protKey];
+  const prow=card.querySelector('.prot-row');
+  prow.classList.toggle('checked',!!rec);
+  prow.querySelector('.item-food').textContent=v.pf;
+  prow.querySelector('.item-qty').textContent=v.pq;
+  prow.querySelector('.kcal-tag').textContent=v.pk+' kcal';
+  prow.onclick=()=>toggleItem(di,prow.id,protKey);
+  const ts=prow.querySelector('.ts-badge');
+  if(ts){if(rec){ts.textContent='⏱ '+fmtTime(rec.ts);ts.classList.add('show');}else{ts.textContent='';ts.classList.remove('show');}}
+  updateDayProg(di);
+}
+
+// ── ROW HTML ──────────────────────────────────────────────────────────────────
+function mkRow(id,di,key,food,qty,kcal,cls){
+  const ch=getChecks(),rec=ch[key],isChk=!!rec;
+  return `<div class="item-row${isChk?' checked':''}${cls?' '+cls:''}" id="${id}" onclick="toggleItem(${di},'${id}','${key}')">
+    <div class="chk"><span class="chk-icon">✓</span></div>
+    <span class="item-food">${food}</span><span class="item-qty">${qty}</span>
+    <span class="kcal-tag">${kcal} kcal</span>
+    <span class="ts-badge${isChk?' show':''}">${isChk?'⏱ '+fmtTime(rec.ts):''}</span>
+  </div>`;
+}
+
+// ── REGISTRAR DÍA ─────────────────────────────────────────────────────────────
+function getLog(di){ return _wk().logs?.[`d${di}`]||null; }
+function saveLog(di,data){ if(!_wk().logs) _wk().logs={}; _wk().logs[`d${di}`]=data; DB.ref(`nd/weeks/w${CW}/logs/d${di}`).set(data); }
+
+function openReg(di){
+  document.getElementById(`regbtn-${di}`).style.display='none';
+  document.getElementById(`regsum-${di}`).style.display='none';
+  const form=document.getElementById(`regform-${di}`);
+  form.style.display='block';
+  const log=getLog(di);
+  if(log){
+    ['kcal','prot','fat','carb','peso','mood','notes'].forEach(f=>{
+      const el=document.getElementById(`rf-${f}-${di}`); if(el) el.value=log[f]||'';
+    });
+  }
+}
+function cancelReg(di){
+  document.getElementById(`regform-${di}`).style.display='none';
+  if(getLog(di)) renderRegSum(di);
+  else document.getElementById(`regbtn-${di}`).style.display='block';
+}
+function saveReg(di){
+  const g=f=>document.getElementById(`rf-${f}-${di}`).value;
+  const data={kcal:g('kcal'),prot:g('prot'),fat:g('fat'),carb:g('carb'),peso:g('peso'),mood:g('mood'),notes:g('notes'),ts:Date.now()};
+  saveLog(di,data);
+  document.getElementById(`regform-${di}`).style.display='none';
+  renderRegSum(di);
+}
+function renderRegSum(di){
+  const log=getLog(di); if(!log) return;
+  const d=PLAN[di],sumEl=document.getElementById(`regsum-${di}`);
+  function mc(label,actual,planned,unit){
+    if(!actual||actual==='') return `<div class="mc-card"><div class="mc-lbl">${label}</div><div class="mc-val" style="color:#334155">—</div><div class="mc-plan">Plan: ${planned}${unit}</div></div>`;
+    const a=parseFloat(actual),delta=Math.round(a-planned),pct=Math.abs(delta/planned*100);
+    const cls=pct<=10?'ok':delta>0?'over':'under';
+    const arrow=delta>=0?'↑':'↓';
+    return `<div class="mc-card"><div class="mc-lbl">${label}</div>
+      <div class="mc-row"><span class="mc-val">${a}${unit}</span><span class="mc-delta ${cls}">${delta>=0?'+':''}${delta} ${arrow}</span></div>
+      <div class="mc-plan">Plan: ${planned}${unit}</div></div>`;
+  }
+  sumEl.innerHTML=`
+    <div class="reg-sum-hdr">
+      <div><div class="reg-sum-title">📋 Registro · ${d.day} ${dayDate(CW,di)}</div><div class="reg-sum-time">Guardado el ${fmtDateTime(log.ts)}</div></div>
+      <button class="reg-edit-btn" onclick="openReg(${di})">✏️ Editar</button>
+    </div>
+    <div class="macro-cmp">
+      ${mc('Calorías',log.kcal,d.kcal,' kcal')}
+      ${mc('Proteína',log.prot,d.prot,'g')}
+      ${mc('Grasas',log.fat,d.fat,'g')}
+      ${mc('Carbohidratos',log.carb,d.carb,'g')}
+      ${log.peso?`<div class="mc-card"><div class="mc-lbl">Peso corporal</div><div class="mc-val">${log.peso} kg</div><div class="mc-plan">Base: 100.3 kg</div></div>`:''}
+    </div>
+    ${log.mood?`<div class="reg-mood">${log.mood}</div>`:''}
+    ${log.notes?`<div class="reg-notes">"${log.notes}"</div>`:''}`;
+  sumEl.style.display='block';
+}
+
+function mkRegSection(di){
+  const d=PLAN[di],hasLog=!!getLog(di);
+  return `<div class="day-reg">
+    <button class="reg-open-btn" id="regbtn-${di}" style="${hasLog?'display:none':''}" onclick="openReg(${di})">📋 Registrar día · ${d.day} ${dayDate(CW,di)}</button>
+    <div class="reg-form-wrap" id="regform-${di}">
+      <div class="reg-form-title">📋 Registrar consumo · ${d.day} ${dayDate(CW,di)}</div>
+      <div class="reg-grid">
+        <div class="reg-field"><label>Calorías consumidas (kcal)</label><input type="number" id="rf-kcal-${di}" placeholder="Ej: ${d.kcal}"></div>
+        <div class="reg-field"><label>Proteína (g)</label><input type="number" id="rf-prot-${di}" placeholder="Ej: ${d.prot}"></div>
+        <div class="reg-field"><label>Grasas (g)</label><input type="number" id="rf-fat-${di}" placeholder="Ej: ${d.fat}"></div>
+        <div class="reg-field"><label>Carbohidratos (g)</label><input type="number" id="rf-carb-${di}" placeholder="Ej: ${d.carb}"></div>
+        <div class="reg-field"><label>Peso corporal (kg)</label><input type="number" id="rf-peso-${di}" step="0.1" placeholder="Ej: 99.5"></div>
+        <div class="reg-field"><label>¿Cómo te sentiste?</label>
+          <select id="rf-mood-${di}">
+            <option value="">Seleccionar...</option>
+            <option>💪 Excelente</option><option>😊 Bien</option>
+            <option>😐 Regular</option><option>😔 Mal</option><option>🤒 Enfermo</option>
+          </select></div>
+        <div class="reg-field full"><label>Notas del día</label>
+          <textarea id="rf-notes-${di}" placeholder="¿Comiste algo diferente? ¿Entrenaste? ¿Algo a mejorar? (opcional)"></textarea></div>
+      </div>
+      <div class="reg-actions">
+        <button class="reg-cancel-btn" onclick="cancelReg(${di})">Cancelar</button>
+        <button class="reg-save-btn" onclick="saveReg(${di})">💾 Guardar registro</button>
+      </div>
+    </div>
+    <div class="reg-sum-wrap" id="regsum-${di}"></div>
+  </div>`;
+}
+
+// ── RENDER DAY ────────────────────────────────────────────────────────────────
+function renderDay(di){
+  const d=PLAN[di],tot=totalDay(di),done=doneDay(di),pct=tot>0?Math.round(done/tot*100):0;
+  let html=`<div class="day-wrap${di===0?' active':''}" id="day-${di}">
+    <div class="day-hdr">
+      <div class="day-title">${d.day} <span class="sub">· ${dayDate(CW,di)}</span></div>
+      <div class="day-macros">
+        <span><span class="dot k"></span>${d.kcal} kcal</span>
+        <span><span class="dot p"></span>P: ${d.prot}g</span>
+        <span><span class="dot g"></span>G: ${d.fat}g</span>
+        <span><span class="dot c"></span>C: ${d.carb}g</span>
+      </div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-labels"><span>Progreso del día</span><span class="prog-pct" id="bar-lbl-${di}">${done} de ${tot} · ${pct}%</span></div>
+      <div class="prog-track"><div class="prog-bar" id="bar-${di}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="meals-grid">`;
+
+  d.meals.forEach((m,mi)=>{
+    if(m.type==='variant'){
+      const vi=getVariant(di,mi),v=m.variants[vi],protKey=`${di}-${mi}-v${vi}-p`,ch=getChecks(),rec=ch[protKey],isChk=!!rec,prowId=`prow-${di}-${mi}`;
+      html+=`<div class="meal-card" id="meal-${di}-${mi}">
+        <div class="meal-img" style="--ca:${v.ca};--cb:${v.cb}"><div class="meal-emoji">${v.emoji}</div><div class="method-badge">${v.method}</div></div>
+        <div class="meal-body">
+          <div class="meal-cat">${m.name}</div><div class="meal-time">${m.time}</div>
+          <div class="variant-toggle">`;
+      m.variants.forEach((vv,vvi)=>{ html+=`<div class="vpill ${vvi===0?'especial':'comun'}${vvi===vi?' active':''}" onclick="switchVariant(${di},${mi},${vvi})">${vvi===0?'⭐':'🏠'} ${vv.tag}</div>`; });
+      html+=`</div>
+          <div class="cook-box"><div class="cook-label">Cómo preparar</div><div class="cook-text">${v.tip}</div></div>
+          <div class="items-list">
+            <div class="item-row prot-row${isChk?' checked':''}" id="${prowId}" onclick="toggleItem(${di},'${prowId}','${protKey}')">
+              <div class="chk"><span class="chk-icon">✓</span></div>
+              <span class="item-food">${v.pf}</span><span class="item-qty">${v.pq}</span>
+              <span class="kcal-tag">${v.pk} kcal</span>
+              <span class="ts-badge${isChk?' show':''}">${isChk?'⏱ '+fmtTime(rec.ts):''}</span>
+            </div>`;
+      m.sides.forEach((s,si)=>{ html+=mkRow(`srow-${di}-${mi}-${si}`,di,`${di}-${mi}-s${si}`,s.f,s.q,s.k,''); });
+      html+=`</div></div></div>`;
+    } else {
+      html+=`<div class="meal-card" id="meal-${di}-${mi}">
+        <div class="meal-img" style="--ca:${m.ca};--cb:${m.cb}"><div class="meal-emoji">${m.emoji}</div><div class="method-badge">${m.method}</div></div>
+        <div class="meal-body">
+          <div class="meal-cat">${m.name}</div><div class="meal-time">${m.time}</div>
+          <div class="cook-box"><div class="cook-label">Cómo preparar</div><div class="cook-text">${m.tip}</div></div>
+          <div class="items-list">`;
+      m.items.forEach((it,ii)=>{ html+=mkRow(`irow-${di}-${mi}-${ii}`,di,`${di}-${mi}-i${ii}`,it.f,it.q,it.k,''); });
+      html+=`</div></div></div>`;
+    }
+  });
+  html+=`</div>${mkRegSection(di)}</div>`;
+  return html;
+}
+
+// ── WEEK NAV ──────────────────────────────────────────────────────────────────
+function renderWeekNav(){
+  const range=weekRange(CW),pct=weekPct(CW);
+  let strip='';
+  for(let w=1;w<=CW;w++){
+    const p=weekPct(w),bc=p===100?'#16a34a':p>49?'#0f766e':p>0?'#b45309':'#2d6a4f';
+    strip+=`<div class="wpill${w===CW?' active':''}" id="wpill-${w}" onclick="gotoWeek(${w})" title="${weekRange(w)}">
+      <span class="wn">S${w}</span><div class="wb"><div class="wbf" style="width:${p}%;background:${bc}"></div></div>
+      <span class="wp">${p}%</span></div>`;
+  }
+  document.getElementById('week-nav').innerHTML=`
+    <div class="wnav-row">
+      <button class="wnav-btn${CW<=1?' disabled':''}" onclick="gotoWeek(${CW-1})">← Sem ${CW-1}</button>
+      <div class="wnav-center">
+        <div class="wnav-title">Semana <span>${CW}</span></div>
+        <div class="wnav-range">${range}</div>
+        <div class="wnav-overall" id="wnav-overall">Progreso semana ${CW}: ${pct}%</div>
+      </div>
+      <button class="wnav-btn" onclick="gotoWeek(${CW+1})">Sem ${CW+1} →</button>
+    </div>
+    <div class="week-strip">${strip}</div>`;
+}
+
+let activeDay=0;
+function renderAllDays(){
+  const tabs=document.getElementById('tabs'),content=document.getElementById('content');
+  tabs.innerHTML=''; content.innerHTML='';
+  PLAN.forEach((d,di)=>{
+    const tab=document.createElement('div');
+    tab.className='tab'+(di===activeDay?' active':'');
+    tab.id=`tab-${di}`;
+    const tot=totalDay(di),done=doneDay(di),pct=tot>0?Math.round(done/tot*100):0;
+    tab.innerHTML=`${d.day}<span class="tdate">${dayDate(CW,di)}</span><span class="tdot" id="tdot-${di}" style="background:${pct===100?'#52b788':pct>0?'#f59e0b':'#1e293b'}"></span>`;
+    tab.onclick=()=>switchDay(di);
+    tabs.appendChild(tab);
+    const wrap=document.createElement('div'); wrap.innerHTML=renderDay(di); content.appendChild(wrap);
+  });
+  PLAN.forEach((_,di)=>{ if(getLog(di)) renderRegSum(di); });
+}
+function switchDay(idx){ activeDay=idx; PLAN.forEach((_,i)=>{ document.getElementById(`day-${i}`)?.classList.toggle('active',i===idx); document.getElementById(`tab-${i}`)?.classList.toggle('active',i===idx); }); }
+function gotoWeek(wk){ if(wk<1) return; CW=wk; STORE.cw=wk; DB.ref('nd/cw').set(wk); activeDay=0; renderWeekNav(); renderAllDays(); }
+
+// ── SECTION TOGGLE ────────────────────────────────────────────────────────────
+function showSection(s){
+  document.getElementById('section-plan').style.display=s==='plan'?'block':'none';
+  document.getElementById('section-inbody').style.display=s==='inbody'?'block':'none';
+  document.getElementById('snav-plan').classList.toggle('active',s==='plan');
+  document.getElementById('snav-inbody').classList.toggle('active',s==='inbody');
+  if(s==='inbody') renderInBody();
+}
+
+// ── INBODY ────────────────────────────────────────────────────────────────────
+const IB_INITIAL={
+  id:1,fecha:'2026-03-24',fechaLabel:'24 marzo 2026',tag:'inicial',
+  peso:100.3,mme:40.4,masaGrasa:30.5,pctGrasa:30.4,agua:51.0,
+  proteinas:14.1,minerales:4.74,imc:33.5,rcc:0.95,
+  metabolismo:1879,fitness:76,nota:'Medición inicial de referencia'
+};
+function getIBHistory(){ return Object.values(STORE.inbody||{}).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)); }
+function saveIBHistory(arr){ const obj={}; arr.forEach(e=>{obj[`e${e.id}`]=e;}); STORE.inbody=obj; DB.ref('nd/inbody').set(obj); }
+function deleteIBEntry(id){
+  if(id===1){alert('La medición inicial no puede eliminarse.');return;}
+  if(!confirm('¿Eliminar esta medición?')) return;
+  const arr=getIBHistory().filter(e=>e.id!==id);
+  saveIBHistory(arr); renderInBody();
+}
+function showIBForm(){ document.getElementById('ib-form').style.display='block'; document.getElementById('ib-add-btn').style.display='none'; }
+function hideIBForm(){ document.getElementById('ib-form').style.display='none'; document.getElementById('ib-add-btn').style.display='block'; }
+function saveIBEntry(){
+  const g=id=>document.getElementById(id).value;
+  const fecha=g('ibf-fecha'); if(!fecha){alert('Ingresa la fecha de la medición.');return;}
+  const entry={
+    id:Date.now(),fecha,
+    fechaLabel: (()=>{const d=new Date(fecha+'T12:00:00');return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;})(),
+    tag:'seguimiento',
+    peso:parseFloat(g('ibf-peso'))||null, mme:parseFloat(g('ibf-mme'))||null,
+    masaGrasa:parseFloat(g('ibf-grasa'))||null, pctGrasa:parseFloat(g('ibf-pctgrasa'))||null,
+    agua:parseFloat(g('ibf-agua'))||null, proteinas:parseFloat(g('ibf-prot'))||null,
+    minerales:parseFloat(g('ibf-min'))||null, imc:parseFloat(g('ibf-imc'))||null,
+    rcc:parseFloat(g('ibf-rcc'))||null, metabolismo:parseFloat(g('ibf-meta'))||null,
+    fitness:parseFloat(g('ibf-fit'))||null, nota:g('ibf-nota')
+  };
+  const arr=getIBHistory(); arr.push(entry); saveIBHistory(arr);
+  hideIBForm(); renderInBody();
+}
+
+function renderInBody(){
+  const entries=getIBHistory();
+  const first=entries[0],last=entries[entries.length-1];
+  const goalFatLoss=18.1;
+  const fatLost=first&&last&&last.masaGrasa?Math.max(0,first.masaGrasa-last.masaGrasa).toFixed(1):0;
+  const goalPct=Math.min(100,Math.round(fatLost/goalFatLoss*100));
+
+  function delta(curr,prev,key){
+    if(!curr||!prev||!curr[key]||!prev[key]) return '';
+    const d=(curr[key]-prev[key]).toFixed(1);
+    const sign=d>=0?'+':'';
+    const cls=d<0?'pos':d>0?'neg':'neu';
+    return `<div class="mdelta ${cls}">${sign}${d}</div>`;
+  }
+  function metric(label,val,unit,prevVal,highlight){
+    const dval=prevVal!=null&&val!=null?(val-prevVal).toFixed(1):null;
+    const cls=dval<0?'pos':dval>0?'neg':'neu';
+    return `<div class="ib-metric${highlight?' highlight':''}">
+      <div class="ml">${label}</div>
+      <div class="mv">${val!=null?val:'—'}<span class="mu"> ${unit}</span></div>
+      ${dval!=null?`<div class="mdelta ${cls}">${dval>=0?'+':''}${dval} vs anterior</div>`:''}
+    </div>`;
+  }
+
+  let entriesHTML='';
+  entries.slice().reverse().forEach((e,ri)=>{
+    const idx=entries.length-1-ri;
+    const prev=idx>0?entries[idx-1]:null;
+    entriesHTML+=`<div class="ib-entry${e.tag==='inicial'?' first-entry':''}">
+      <div class="ib-entry-hdr">
+        <div><div class="ib-entry-date">${e.fechaLabel}</div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="ib-entry-tag tag-${e.tag}">${e.tag==='inicial'?'📍 Inicial':'📊 Seguimiento'}</span>
+          ${e.tag!=='inicial'?`<button class="ib-entry-del" onclick="deleteIBEntry(${e.id})">Eliminar</button>`:''}
+        </div>
+      </div>
+      <div class="ib-metrics">
+        ${metric('Peso',e.peso,'kg',prev?.peso,false)}
+        ${metric('% Grasa',e.pctGrasa,'%',prev?.pctGrasa,true)}
+        ${metric('Masa Grasa',e.masaGrasa,'kg',prev?.masaGrasa,false)}
+        ${metric('Músculo (MME)',e.mme,'kg',prev?.mme,false)}
+        ${metric('IMC',e.imc,'',prev?.imc,false)}
+        ${metric('RCC',e.rcc,'',prev?.rcc,false)}
+        ${metric('Agua corporal',e.agua,'kg',prev?.agua,false)}
+        ${metric('Proteínas',e.proteinas,'kg',prev?.proteinas,false)}
+        ${metric('Metabolismo basal',e.metabolismo,'kcal',prev?.metabolismo,false)}
+        ${metric('Estado fitness',e.fitness,'pts',prev?.fitness,false)}
+      </div>
+      ${e.nota?`<div class="ib-entry-nota">"${e.nota}"</div>`:''}
+    </div>`;
+  });
+
+  let evoHTML='';
+  if(entries.length>=2){
+    evoHTML=`<div class="ib-evo">
+      <div class="ib-evo-title">📈 Evolución global (inicial → última medición)</div>
+      <table class="ib-evo-table">
+        <thead><tr><th>Métrica</th><th>Inicial</th><th>Última</th><th>Cambio</th></tr></thead>
+        <tbody>`;
+    const metrics=[
+      {k:'peso',l:'Peso',u:'kg',good:'down'},
+      {k:'pctGrasa',l:'% Grasa',u:'%',good:'down'},
+      {k:'masaGrasa',l:'Masa Grasa',u:'kg',good:'down'},
+      {k:'mme',l:'Músculo (MME)',u:'kg',good:'up'},
+      {k:'imc',l:'IMC',u:'',good:'down'},
+      {k:'rcc',l:'RCC',u:'',good:'down'},
+      {k:'metabolismo',l:'Metabolismo basal',u:'kcal',good:'up'},
+      {k:'fitness',l:'Estado fitness',u:'pts',good:'up'},
+    ];
+    metrics.forEach(m=>{
+      const ini=first[m.k],ult=last[m.k];
+      if(!ini||!ult){evoHTML+=`<tr><td>${m.l}</td><td>${ini||'—'} ${m.u}</td><td>${ult||'—'} ${m.u}</td><td style="color:#475569">—</td></tr>`;return;}
+      const d=(ult-ini).toFixed(1),sign=d>=0?'+':'';
+      const isGood=(m.good==='down'&&d<0)||(m.good==='up'&&d>0);
+      const color=isGood?'#52b788':d==0?'#64748b':'#f87171';
+      evoHTML+=`<tr><td>${m.l}</td><td>${ini} ${m.u}</td><td>${ult} ${m.u}</td><td style="color:${color};font-weight:600">${sign}${d} ${m.u}</td></tr>`;
+    });
+    evoHTML+=`</tbody></table></div>`;
+  }
+
+  document.getElementById('section-inbody').innerHTML=`
+    <div class="ib-header">
+      <div class="ib-title">Historial <span>InBody</span></div>
+      <button class="ib-add-btn" id="ib-add-btn" onclick="showIBForm()">+ Nueva medición</button>
+    </div>
+    <div class="ib-goal">
+      <div class="ib-goal-item"><div class="ib-goal-val" style="color:#f87171">${first?.masaGrasa||'—'} kg</div><div class="ib-goal-lbl">Grasa inicial</div></div>
+      <div class="ib-goal-sep">→</div>
+      <div class="ib-goal-item"><div class="ib-goal-val" style="color:#52b788">${((first?.masaGrasa||0)-goalFatLoss).toFixed(1)} kg</div><div class="ib-goal-lbl">Meta grasa</div></div>
+      <div class="ib-goal-sep">·</div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar-label"><span>Progreso hacia la meta</span><span style="color:#52b788;font-weight:600">${fatLost} kg / ${goalFatLoss} kg (${goalPct}%)</span></div>
+        <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${goalPct}%"></div></div>
+      </div>
+    </div>
+    <div class="ib-form-wrap" id="ib-form">
+      <div class="ib-form-title">📊 Nueva medición InBody</div>
+      <div class="ib-form-grid">
+        <div class="ib-field"><label>Fecha de la medición</label><input type="date" id="ibf-fecha"></div>
+        <div class="ib-field"><label>Peso (kg)</label><input type="number" id="ibf-peso" step="0.1" placeholder="Ej: 98.5"></div>
+        <div class="ib-field"><label>Músculo Esquelético MME (kg)</label><input type="number" id="ibf-mme" step="0.1" placeholder="Ej: 40.4"></div>
+        <div class="ib-field"><label>Masa Grasa (kg)</label><input type="number" id="ibf-grasa" step="0.1" placeholder="Ej: 28.0"></div>
+        <div class="ib-field"><label>% Grasa Corporal</label><input type="number" id="ibf-pctgrasa" step="0.1" placeholder="Ej: 28.4"></div>
+        <div class="ib-field"><label>Agua Corporal (kg)</label><input type="number" id="ibf-agua" step="0.1" placeholder="Ej: 51.0"></div>
+        <div class="ib-field"><label>Proteínas (kg)</label><input type="number" id="ibf-prot" step="0.1" placeholder="Ej: 14.1"></div>
+        <div class="ib-field"><label>Minerales (kg)</label><input type="number" id="ibf-min" step="0.01" placeholder="Ej: 4.74"></div>
+        <div class="ib-field"><label>IMC</label><input type="number" id="ibf-imc" step="0.1" placeholder="Ej: 33.5"></div>
+        <div class="ib-field"><label>RCC (cintura/cadera)</label><input type="number" id="ibf-rcc" step="0.01" placeholder="Ej: 0.95"></div>
+        <div class="ib-field"><label>Metabolismo basal (kcal)</label><input type="number" id="ibf-meta" placeholder="Ej: 1879"></div>
+        <div class="ib-field"><label>Estado fitness (puntos)</label><input type="number" id="ibf-fit" placeholder="Ej: 76"></div>
+        <div class="ib-field full"><label>Nota (opcional)</label><textarea id="ibf-nota" placeholder="¿Algo relevante de esta medición?"></textarea></div>
+      </div>
+      <div class="ib-form-actions">
+        <button class="ib-cancel" onclick="hideIBForm()">Cancelar</button>
+        <button class="ib-save" onclick="saveIBEntry()">💾 Guardar medición</button>
+      </div>
+    </div>
+    ${evoHTML}
+    <div class="ib-entries">${entriesHTML}</div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(async function init(){
+  try{
+    const snap=await DB.ref('nd').once('value');
+    const data=snap.val()||{};
+    STORE.cw=data.cw||1;
+    STORE.weeks=data.weeks||{};
+    STORE.inbody=data.inbody||{};
+    if(!Object.keys(STORE.inbody).length){ STORE.inbody={e1:IB_INITIAL}; DB.ref('nd/inbody').set(STORE.inbody); }
+    CW=STORE.cw;
+  }catch(e){
+    console.warn('Firebase no disponible, iniciando vacío',e);
+    STORE={cw:1,weeks:{},inbody:{e1:IB_INITIAL}};
+    CW=1;
+  }
+  document.getElementById('nd-loading').style.display='none';
+  renderWeekNav();
+  renderAllDays();
+})();
+</script>
+</body>
+</html>
