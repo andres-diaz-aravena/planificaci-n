@@ -205,19 +205,163 @@ header h1 span{color:#52b788;}
 .ib-empty{text-align:center;padding:32px;color:#475569;font-size:0.85rem;border:1.5px dashed #1e293b;border-radius:12px;}
 
 @keyframes nd-spin{to{transform:rotate(360deg)}}
-@media(max-width:680px){
+#nd-login{position:fixed;inset:0;background:#0f1117;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9998;padding:24px;}
+.nd-login-card{background:#1a1f2e;border:1px solid #2a2f3e;border-radius:16px;padding:36px 28px;max-width:360px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px;}
+.nd-login-icon{font-size:3rem;line-height:1;}
+.nd-login-title{font-size:1.5rem;font-weight:700;color:#fff;}
+.nd-login-title span{color:#52b788;}
+.nd-login-sub{font-size:0.82rem;color:#64748b;line-height:1.6;}
+.nd-google-btn{display:flex;align-items:center;gap:11px;background:#fff;border:none;border-radius:10px;padding:13px 22px;cursor:pointer;font-size:0.88rem;font-weight:600;color:#1f2937;width:100%;justify-content:center;transition:all .2s;box-shadow:0 2px 10px rgba(0,0,0,.35);font-family:inherit;}
+.nd-google-btn:hover{background:#f1f5f9;box-shadow:0 4px 14px rgba(0,0,0,.45);}
+.nd-login-err{color:#f87171;font-size:0.78rem;display:none;margin-top:-6px;}
+.nd-signout{background:transparent;border:1px solid #374151;border-radius:7px;color:#64748b;padding:6px 13px;cursor:pointer;font-size:0.73rem;font-family:inherit;transition:all .2s;}
+.nd-signout:hover{border-color:#f87171;color:#f87171;}
+
+/* ── TABLET (≤768px) ── */
+@media(max-width:768px){
+  .ib-metrics{grid-template-columns:repeat(3,1fr);}
+  .ib-form-grid{grid-template-columns:repeat(2,1fr);}
+  .reg-grid{grid-template-columns:repeat(2,1fr);}
+  .macro-cmp{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── MOBILE (≤600px) ── */
+@media(max-width:600px){
+  /* Header */
+  header{flex-direction:column;align-items:flex-start;padding:14px 16px;gap:8px;}
+  header h1{font-size:1.3rem;}
+  .meta{text-align:left;font-size:0.72rem;line-height:1.6;}
+
+  /* Stats — 3 columnas x 2 filas */
+  .stats{padding:10px 12px;gap:7px;}
+  .stat{flex:0 0 calc(33.33% - 5px);min-width:0;padding:8px 6px;}
+  .stat .val{font-size:1.05rem;}
+  .stat .lbl{font-size:0.6rem;}
+
+  /* Section nav */
+  .snav{padding:11px 16px;font-size:0.82rem;flex:1;justify-content:center;}
+
+  /* Week nav */
+  .week-nav{padding:12px 12px;}
+  .wnav-row{gap:6px;}
+  .wnav-btn{padding:6px 10px;font-size:0.75rem;}
+  .wnav-title{font-size:1rem;}
+  .wnav-range{font-size:0.68rem;}
+  .wnav-overall{font-size:0.7rem;}
+  .wpill{min-width:46px;padding:5px 7px;}
+  .wpill .wn{font-size:0.68rem;}
+  .wpill .wp{font-size:0.58rem;}
+  .wpill .wb{width:30px;}
+
+  /* Day tabs */
+  .tabs{padding:0 8px;}
+  .tab{padding:10px 10px;font-size:0.78rem;}
+  .tab .tdate{font-size:0.58rem;}
+
+  /* Day content */
+  .day-wrap,#section-inbody{padding:12px 12px;}
+  .day-hdr{flex-direction:column;gap:4px;margin-bottom:12px;}
+  .day-title{font-size:1.05rem;}
+  .day-macros{font-size:0.7rem;gap:7px;}
+
+  /* Progress */
+  .prog-labels{font-size:0.72rem;}
+
+  /* Meal card — apilado vertical */
+  .meals-grid{gap:12px;}
   .meal-card{grid-template-columns:1fr;}
-  .meal-img{flex-direction:row;height:76px;justify-content:flex-start;padding:14px 18px;gap:14px;}
-  .meal-emoji{font-size:2.3rem;}
-  header{flex-direction:column;text-align:center;} .meta{text-align:center;}
-  .day-wrap,#section-inbody{padding:18px 14px;}
-  .week-nav,.stats{padding-left:16px;padding-right:16px;}
+  .meal-img{flex-direction:row;height:68px;justify-content:flex-start;padding:12px 14px;gap:12px;}
+  .meal-emoji{font-size:1.9rem;}
+  .method-badge{font-size:0.58rem;}
+  .meal-body{padding:12px 13px;}
+  .meal-cat{font-size:0.65rem;}
+  .meal-time{font-size:0.67rem;margin-bottom:8px;}
+
+  /* Variant pills */
+  .variant-toggle{flex-wrap:wrap;gap:5px;}
+  .vpill{font-size:0.7rem;padding:5px 10px;}
+
+  /* Cook box */
+  .cook-box{padding:8px 10px;margin-bottom:10px;}
+  .cook-label{font-size:0.6rem;}
+  .cook-text{font-size:0.76rem;}
+
+  /* Item rows */
+  .item-row{padding:7px 8px;gap:7px;}
+  .item-food{font-size:0.78rem;}
+  .item-qty{font-size:0.68rem;}
+  .kcal-tag{font-size:0.63rem;padding:2px 5px;}
+  .chk{width:17px;height:17px;border-radius:4px;}
+  .ts-badge{font-size:0.63rem;padding:2px 5px;}
+
+  /* Registro día */
+  .day-reg{margin-top:20px;padding-top:18px;}
+  .reg-open-btn{padding:12px;font-size:0.83rem;}
+  .reg-form-wrap{padding:16px 14px;}
+  .reg-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .reg-field label{font-size:0.65rem;}
+  .reg-field input,.reg-field select,.reg-field textarea{font-size:0.81rem;padding:8px 10px;}
+  .macro-cmp{grid-template-columns:1fr 1fr;gap:8px;}
+  .mc-card{padding:9px 10px;}
+  .mc-lbl{font-size:0.6rem;}
+  .mc-val{font-size:0.95rem;}
+  .mc-plan{font-size:0.63rem;}
+
+  /* InBody */
+  .ib-header{flex-direction:column;align-items:flex-start;gap:10px;}
+  .ib-title{font-size:1.1rem;}
+  .ib-add-btn{width:100%;text-align:center;padding:10px;}
+  .ib-goal{flex-direction:column;gap:10px;padding:14px 16px;}
+  .ib-goal-item{display:flex;justify-content:space-between;align-items:center;}
+  .ib-goal-val{font-size:1.05rem;}
+  .ib-goal-sep{display:none;}
+  .goal-bar-wrap{min-width:0;width:100%;}
+  .goal-bar-label{font-size:0.69rem;}
+  .ib-metrics{grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 12px;}
+  .ib-metric .ml{font-size:0.59rem;}
+  .ib-metric .mv{font-size:0.95rem;}
+  .ib-metric .mdelta{font-size:0.65rem;}
+  .ib-entry-hdr{padding:11px 13px;}
+  .ib-entry-date{font-size:0.85rem;}
+  .ib-entry-nota{padding:0 13px 12px;font-size:0.75rem;}
+  .ib-evo{padding:14px 12px;overflow-x:auto;}
+  .ib-evo-table{min-width:320px;font-size:0.76rem;}
+  .ib-evo-table th,.ib-evo-table td{padding:7px 8px;}
+  .ib-form-wrap{padding:16px 14px;}
+  .ib-form-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .ib-field label{font-size:0.65rem;}
+  .ib-field input,.ib-field textarea{font-size:0.81rem;padding:8px 10px;}
+}
+
+/* ── MÓVIL PEQUEÑO (≤380px) ── */
+@media(max-width:380px){
+  .stats{gap:5px;}
+  .stat{flex:0 0 calc(50% - 3px);}
+  .snav{font-size:0.78rem;padding:10px 12px;}
+  .wnav-btn{padding:6px 8px;font-size:0.7rem;}
+  .reg-grid{grid-template-columns:1fr;}
+  .ib-form-grid{grid-template-columns:1fr;}
+  .macro-cmp{grid-template-columns:1fr 1fr;}
+  .ib-metrics{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
 <body>
 
-<div id="nd-loading" style="position:fixed;inset:0;background:#0f1117;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:18px;">
+<div id="nd-login">
+  <div class="nd-login-card">
+    <div class="nd-login-icon">🥗</div>
+    <div class="nd-login-title">Plan <span>Nutricional</span></div>
+    <div class="nd-login-sub">Acceso privado · Andrés Díaz<br>Inicia sesión para ver tu plan</div>
+    <button class="nd-google-btn" onclick="signInWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20">
+      Continuar con Google
+    </button>
+    <div class="nd-login-err" id="nd-login-err">Error al iniciar sesión. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<div id="nd-loading" style="position:fixed;inset:0;background:#0f1117;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:18px;">
   <div style="width:44px;height:44px;border:3px solid #2d6a4f;border-top-color:#52b788;border-radius:50%;animation:nd-spin .8s linear infinite;"></div>
   <div style="color:#52b788;font-size:0.9rem;font-family:'Segoe UI',sans-serif;letter-spacing:.03em;">Sincronizando datos...</div>
 </div>
@@ -231,6 +375,7 @@ header h1 span{color:#52b788;}
     <div>InBody base: 24 marzo 2026 · 100.3 kg · 30.4% grasa</div>
     <div>Masa muscular: 40.4 kg (Alto) · Meta: −18.1 kg grasa</div>
     <div>Déficit: ~500 kcal/día · Próximo InBody: agosto 2026</div>
+    <div style="margin-top:6px;"><button class="nd-signout" onclick="signOut()">Cerrar sesión</button></div>
   </div>
 </header>
 
@@ -260,6 +405,7 @@ header h1 span{color:#52b788;}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
 const START = new Date(2026,5,1);
@@ -866,8 +1012,26 @@ function renderInBody(){
     <div class="ib-entries">${entriesHTML}</div>`;
 }
 
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+const AUTH=firebase.auth();
+const GPROVIDER=new firebase.auth.GoogleAuthProvider();
+
+function signInWithGoogle(){
+  AUTH.signInWithPopup(GPROVIDER).catch(()=>{
+    document.getElementById('nd-login-err').style.display='block';
+  });
+}
+function signOut(){ AUTH.signOut(); }
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
-(async function init(){
+AUTH.onAuthStateChanged(async user=>{
+  if(!user){
+    document.getElementById('nd-login').style.display='flex';
+    document.getElementById('nd-loading').style.display='none';
+    return;
+  }
+  document.getElementById('nd-login').style.display='none';
+  document.getElementById('nd-loading').style.display='flex';
   try{
     const snap=await DB.ref('nd').once('value');
     const data=snap.val()||{};
@@ -877,14 +1041,14 @@ function renderInBody(){
     if(!Object.keys(STORE.inbody).length){ STORE.inbody={e1:IB_INITIAL}; DB.ref('nd/inbody').set(STORE.inbody); }
     CW=STORE.cw;
   }catch(e){
-    console.warn('Firebase no disponible, iniciando vacío',e);
+    console.warn('Firebase no disponible',e);
     STORE={cw:1,weeks:{},inbody:{e1:IB_INITIAL}};
     CW=1;
   }
   document.getElementById('nd-loading').style.display='none';
   renderWeekNav();
   renderAllDays();
-})();
+});
 </script>
 </body>
 </html>
